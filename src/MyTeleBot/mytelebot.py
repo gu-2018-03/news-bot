@@ -24,6 +24,8 @@ class MyTeleBot:
 
     def format_news(self):
         news = self.db.get_news()
+        if len(news)==0:
+            return (constants.BASE_EMPTY)
         return '\n\n'.join(
             [constants.TEMPLATE.format(**n) for n in news])
 
