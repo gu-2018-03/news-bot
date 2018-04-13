@@ -92,8 +92,9 @@ class AsyncMyTeleBotDB:
     класс для работы с БД.
     """
 
-    def __init__(self):
-        self.client = motor_asyncio.AsyncIOMotorClient()
+    def __init__(self, loop):
+        self.client = motor_asyncio.AsyncIOMotorClient(io_loop=loop)
+
         self.db = self.client.telebot
         self.required = {'title', 'published', 'link', 'summary', 'base'}
 
