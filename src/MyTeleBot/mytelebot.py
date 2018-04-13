@@ -12,7 +12,9 @@ class MyTeleBot:
         self.init_handlers()
 
     def init_handlers(self):
-        ''' Инициализация обработчиков событий telegram '''
+        """
+        Инициализация обработчиков событий telegram
+        """
 
         @self.bot.message_handler(commands=['start', 'help'])
         def command_help(message):
@@ -24,14 +26,12 @@ class MyTeleBot:
 
     def format_news(self):
         news = self.db.get_news()
-        if len(news)==0:
+        if len(news) == 0:
             return (constants.BASE_EMPTY)
         return '\n\n'.join(
             [constants.TEMPLATE.format(**n) for n in news])
 
-    
     def run(self):
-        
         self.bot.polling(none_stop=True, interval=0)
 
 
