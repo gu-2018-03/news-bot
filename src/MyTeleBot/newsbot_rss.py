@@ -8,13 +8,13 @@ import feedparser
 import aiohttp
 import async_timeout
 import html2text
-from mytelebot_db import MyTeleBotDB
+from mytelebot_db import AsyncMyTeleBotDB
 
 RSS_CHANNELS = {
     'echo': 'https://echo.msk.ru/interview/rss-fulltext.xml',
-    'popular_science_science': 'https://www.popsci.com/rss-science.xml?loc=contentwell&lnk=science&dom=section-1',
-    'popular_science_tech': 'https://www.popsci.com/rss-technology.xml?loc=contentwell&lnk=tech&dom=section-1',
-    'popular_science_diy': 'https://www.popsci.com/rss-diy.xml?loc=contentwell&lnk=diy&dom=section-1'
+    # 'popular_science_science': 'https://www.popsci.com/rss-science.xml?loc=contentwell&lnk=science&dom=section-1',
+    # 'popular_science_tech': 'https://www.popsci.com/rss-technology.xml?loc=contentwell&lnk=tech&dom=section-1',
+    # 'popular_science_diy': 'https://www.popsci.com/rss-diy.xml?loc=contentwell&lnk=diy&dom=section-1'
 }
 
 
@@ -52,16 +52,16 @@ async def process(feed, entries, news_queue):
     функция, обрабатывающая записии, формирующая новости и отправляющая новости
     в очередь новостей, принимает список записей и очередь новостей
     '''
-    if entries is not None:
-        for entry in entries[-1:]:
-            news = {}
-            published = time.mktime(entry.published_parsed)
-            news['title'] = entry['title']
-            news['link'] = entry['link']
-            news['published'] = published
-            news['summary'] = html2text.html2text(entry['summary'])
-            news['base'] = feed
-            news_queue.put(news)
+    for entry in entries:
+        news = {}
+        published = time.mktime(entry.published_parsed)
+        news['title'] = entry['title']
+        news['link'] = entry['link']
+        news['published'] = published
+        news['summary'] = html2text.html2text(entry['summary'])
+        news['base'] = feed
+        news_queue.put(news)
+        await asyncio.sleep(0)
 
 
 async def send_to_db(db, news_queue, rss_source):
@@ -74,8 +74,10 @@ async def send_to_db(db, news_queue, rss_source):
             await asyncio.sleep(0)
         else:
             news = news_queue.get()
-            db.set_news(news)
-            await asyncio.sleep(0)
+            try:
+                await db.set_news(news)
+            except Exception as e:
+                print(e)
 
 
 async def get_data2(channel, feeds_queue):
@@ -99,18 +101,22 @@ def main_cycle():
     news_queue = queue.Queue()
     feeds_queue = queue.Queue()
     rss_source = Rss_source(RSS_CHANNELS)
-    db = MyTeleBotDB()
 
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
+    db = AsyncMyTeleBotDB(loop)
 
     tasks = [asyncio.Task(get_data2(channel, feeds_queue))
                 for channel in rss_source.channels.values()]
     tasks.append(read_feed(feeds_queue, news_queue, rss_source))
     tasks.append(send_to_db(db, news_queue, rss_source))
 
-    loop.run_until_complete(asyncio.wait(tasks))
-    loop.close()
+    try:
+        loop.run_until_complete(asyncio.wait(tasks))
+    except Exception as e:
+        print(e)
+    finally:
+        loop.close()
 
 
 if __name__ == '__main__':
