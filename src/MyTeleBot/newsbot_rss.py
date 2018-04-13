@@ -11,7 +11,7 @@ import html2text
 from mytelebot_db import AsyncMyTeleBotDB
 
 RSS_CHANNELS = {
-    'echo': 'https://echo.msk.ru/interview/rss-fulltext.xml',
+    # 'echo': 'https://echo.msk.ru/interview/rss-fulltext.xml',
     'lenta': 'http://lenta.ru/rss/news',
     # 'popular_science_science': 'https://www.popsci.com/rss-science.xml?loc=contentwell&lnk=science&dom=section-1',
     # 'popular_science_tech': 'https://www.popsci.com/rss-technology.xml?loc=contentwell&lnk=tech&dom=section-1',
@@ -53,21 +53,23 @@ async def process(db, feed, entries, news_queue):
     функция, обрабатывающая записии, формирующая новости и отправляющая новости
     в очередь новостей, принимает список записей и очередь новостей
     '''
-    
+    last_published = await db.get_last_published(feed)
     for entry in entries:
         news = {}
         published = time.mktime(entry.published_parsed)
-        news['title'] = entry['title']
-        news['link'] = entry['link']
-        news['published'] = published
-        news['summary'] = html2text.html2text(entry['summary'])
-        news['base'] = feed
-        # news_queue.put(news)
-        try:
-            await db.set_news(news)
-        except Exception as e:
-            print(e)
-        # await asyncio.sleep(0)
+        if published > last_published:
+            news['title'] = entry['title']
+            news['link'] = entry['link']
+            news['published'] = published
+            news['summary'] = html2text.html2text(entry['summary'])
+            news['base'] = feed
+            # news_queue.put(news)
+            try:
+                await db.set_news(news)
+            except Exception as e:
+                print(e)
+        else:
+            break
 
 
 # async def send_to_db(db, news_queue, rss_source):
