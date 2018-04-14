@@ -19,6 +19,7 @@ def test_set_news_err_dict(db):
     with pytest.raises(TypeError):
         db.set_news('')
 
+
 def test_set_news_err_required_fields(db):
     news = {
         'title': 'First news',
@@ -28,6 +29,7 @@ def test_set_news_err_required_fields(db):
     }
     with pytest.raises(TypeError):
         db.set_news(news)
+
 
 def test_set_news_err_published_float(db):
     news = {
@@ -40,13 +42,16 @@ def test_set_news_err_published_float(db):
     with pytest.raises(TypeError):
         db.set_news(news)
 
+
 def test_get_news_empty(db):
     news = db.get_news()
     assert not news
 
+
 def test_get_news_returned_type(db):
     news = db.get_news()
     assert isinstance(news, list)
+
 
 def test_set_news(db):
     news = {
@@ -61,6 +66,7 @@ def test_set_news(db):
     assert len(result) == 1
     assert result[0] == news
 
+
 def test_get_news_return_sorted(db):
     for i in range(15):
         news = {
@@ -74,11 +80,13 @@ def test_get_news_return_sorted(db):
 
     result = db.get_news(count=15)
     assert len(result) == 15
-    assert all(result[i]['published'] >= result[i+1]['published']
+    assert all(result[i]['published'] >= result[i + 1]['published']
                for i in range(len(result) - 1))
+
 
 def test_get_last_published_for_empty(db):
     assert db.get_last_published('https://some_rss') == 0.0
+
 
 def test_get_last_published(db):
     for i in range(10):
@@ -98,6 +106,6 @@ def test_get_last_published(db):
             'base': 'https://another/rss',
         }
         db.set_news(news)
-    
+
     assert db.get_last_published('https://bla.bla/rss') == 9
     assert db.get_last_published('https://another/rss') == 19
