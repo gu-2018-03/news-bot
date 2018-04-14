@@ -108,3 +108,6 @@ ENV/
 
 mytoken.py
 .pytest_cache
+
+# IDE
+.idea/
