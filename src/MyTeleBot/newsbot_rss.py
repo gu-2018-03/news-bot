@@ -39,23 +39,23 @@ async def read_feed(db, feeds_queue, rss_source):
     left_to_process = rss_source.left_to_process
     while (left_to_process > 0):
         if not feeds_queue.empty():
-            feed = feeds_queue.get()
+            channel, feed = feeds_queue.get()
             if feed:
                 try:
                     rss = feedparser.parse(feed)
-                    await process(db, rss.feed.link, rss.entries)
+                    await process(db, channel, rss.entries)
                     left_to_process -= 1
                 except Exception as e:
                     print(e)
         await asyncio.sleep(0)
 
 
-async def process(db, feed, entries):
+async def process(db, channel, entries):
     """
     функция, обрабатывающая записии, формирующая новости и отправляющая новости
     в очередь новостей, принимает список записей и очередь новостей
     """
-    last_published = await db.get_last_published(feed)
+    last_published = await db.get_last_published(channel)
     news_count = 0
     for entry in entries:
         news = {}
@@ -65,7 +65,7 @@ async def process(db, feed, entries):
             news['link'] = entry['link']
             news['published'] = published
             news['summary'] = html2text.html2text(entry['summary'])
-            news['base'] = feed
+            news['base'] = channel
             try:
                 await db.set_news(news)
                 news_count += 1
@@ -73,7 +73,7 @@ async def process(db, feed, entries):
                 print(e)
         else:
             break
-    print('Добавленно {} новостей из {}'.format(news_count, feed))
+    print('Добавленно {} новостей из {}'.format(news_count, channel))
 
 
 async def get_data2(channel, feeds_queue):
@@ -85,7 +85,7 @@ async def get_data2(channel, feeds_queue):
             try:
                 async with session.get(channel) as response:
                     data = await response.read()
-                    feeds_queue.put(data)
+                    feeds_queue.put((channel, data))
             except TimeoutError as e:
                 print('Connection Timeout', e)
             except aiohttp.client_exceptions.ClientConnectorError as e:
