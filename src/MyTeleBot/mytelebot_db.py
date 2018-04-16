@@ -16,6 +16,7 @@ class MyTeleBotDB:
             raise
 
         self.db = self.client.telebot
+        self.db.news.create_index('published')
         self.required = {'title', 'published', 'link', 'summary', 'base'}
 
     def get_news(self, key='', count=10) -> []:
