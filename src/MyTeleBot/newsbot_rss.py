@@ -106,9 +106,12 @@ def main_cycle():
                 for channel in rss_source.channels.values()]
     tasks.append(read_feed(db, feeds_queue, rss_source)) # db
     
+    start = time.time()
     loop.run_until_complete(asyncio.wait(tasks))
 
     loop.close()
+    elapsed = time.time() - start
+    print('Затраченное время: {:.3f} сек'.format(elapsed))
 
 
 if __name__ == '__main__':
