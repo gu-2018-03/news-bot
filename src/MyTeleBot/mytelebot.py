@@ -4,7 +4,7 @@ import constants
 from mytelebot_db import MyTeleBotDB
 from mytoken import TOKEN
 from emoji import emojize
-
+from datetime import datetime
 
 class MyTeleBot:
     def __init__(self):
@@ -34,8 +34,13 @@ class MyTeleBot:
         news = self.db.get_news()
         if len(news) == 0:
             return (constants.BASE_EMPTY)
-        return '\n\n'.join(
-            [constants.TEMPLATE.format(**n, emoji=emojize(":arrow_right:", use_aliases=True)) for n in news])
+        answer = '\n\n'
+        for i in news:
+            date = datetime.utcfromtimestamp(i['published']).strftime("%Y-%m-%d %H:%M:%S")
+            payload = constants.TEMPLATE.format(**i)
+            answer = '{} {} {} {} \n\n'.format(answer, emojize(":arrow_right:", use_aliases=True), str(date), payload)
+
+        return answer
 
     def run(self):
         self.bot.polling(none_stop=True, interval=0)
