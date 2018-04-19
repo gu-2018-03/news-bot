@@ -1,21 +1,29 @@
 
 import asyncio
+import logging
+import os
 import queue
 import time
 
-import feedparser
-
 import aiohttp
 import async_timeout
+import feedparser
 import html2text
-import logging
+
 from mytelebot_db import AsyncMyTeleBotDB
 
 # путь к файлу с логами,
 PATH_LOG = './log/'
 
+if not os.path.exists(PATH_LOG):
+    os.makedirs(PATH_LOG)
+
 # конфигурация логгера
-logging.basicConfig(filename=PATH_LOG+'rss.log', format='%(asctime)-15s %(message)s', level=logging.INFO)
+logging.basicConfig(
+    # filename=PATH_LOG+'rss.log',
+    handlers=[logging.FileHandler(PATH_LOG + 'rss.log', 'a', 'utf-8')],
+    format='%(asctime)-15s %(message)s',
+    level=logging.INFO)
 logger = logging.getLogger('rss')
 
 RSS_CHANNELS = {
@@ -54,7 +62,7 @@ async def read_feed(db, feeds_queue, rss_source):
                     await process(db, channel, rss.entries)
                     left_to_process -= 1
                 except Exception as e:
-                    logger.log(logging.WARN, 'Error: {} in parsing feed (read_feed)'.format(e))
+                    logger.exception('Error: %s in parsing feed (read_feed)', e)
         await asyncio.sleep(0)
 
 
@@ -78,10 +86,10 @@ async def process(db, channel, entries):
                 await db.set_news(news)
                 news_count += 1
             except Exception as e:
-                logger.log(logging.WARN, 'Error: {} in db.set_news'.format(e))
+                logger.exception('Error: %s in db.set_news', e)
         else:
             break
-    logger.log(logging.INFO, 'Добавленно {} новостей из {}'.format(news_count, channel))
+    logger.info('Добавленно %d новостей из %s', news_count, channel)
     # print('Добавленно {} новостей из {}'.format(news_count, channel))
 
 
@@ -96,10 +104,10 @@ async def get_data2(channel, feeds_queue):
                     data = await response.read()
                     feeds_queue.put((channel, data))
             except TimeoutError as e:
-                logger.log(logging.WARN, 'Error: {} in session.get'.format(e))
+                logger.exception('Error: %s in session.get', e)
                 # print('Connection Timeout', e)
             except aiohttp.client_exceptions.ClientConnectorError as e:
-                logger.log(logging.WARN, 'Connection error: {} in session.get'.format(e))
+                logger.exception('Connection error: %s in session.get', e)
                 # print('Connection Error')
 
 
@@ -123,7 +131,7 @@ def main_cycle():
     loop.close()
     elapsed = time.time() - start
 
-    print('Затраченное время: {:.3f} сек'.format(elapsed))
+    logger.info('Затраченное время: %.3f сек', elapsed)
 
 
 if __name__ == '__main__':
