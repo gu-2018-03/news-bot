@@ -87,6 +87,40 @@ class MyTeleBotDB:
         last_time = last_news['published']
         return last_time
 
+    def add_rss(self, short_name, channel, **kwargs):
+        """
+        Добавить rss-канал в БД.
+        """
+        pass
+
+    def check_rss_name(self, short_name) -> bool:
+        """ Проверить наличие rss-канала по имени. """
+        pass
+
+    def check_rss_channel(self, channel) -> bool:
+        """ Проверить наличие rss-канала по адрессу. """
+        pass
+    
+    def update_rss(self, short_name, **kwargs):
+        """
+        Обновить rss-канал.
+        """
+        pass
+
+    def delete_rss(self, short_name):
+        """ Удалить rss-канал. """
+        pass
+
+    def get_rss_channels(self):
+        """ Получить список rss-каналов.
+        Возвращает словарь вида:
+        {
+            short_name: channel,
+            ...
+        }
+        """
+        pass
+
 
 class AsyncMyTeleBotDB:
     """
