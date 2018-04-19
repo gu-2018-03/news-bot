@@ -8,7 +8,15 @@ import feedparser
 import aiohttp
 import async_timeout
 import html2text
+import logging
 from mytelebot_db import AsyncMyTeleBotDB
+
+# путь к файлу с логами,
+PATH_LOG = './log/'
+
+# конфигурация логгера
+logging.basicConfig(filename=PATH_LOG+'rss.log', format='%(asctime)-15s %(message)s', level=logging.INFO)
+logger = logging.getLogger('rss')
 
 RSS_CHANNELS = {
     'echo': 'https://echo.msk.ru/interview/rss-fulltext.xml',
@@ -46,7 +54,7 @@ async def read_feed(db, feeds_queue, rss_source):
                     await process(db, channel, rss.entries)
                     left_to_process -= 1
                 except Exception as e:
-                    print(e)
+                    logger.log(logging.WARN, 'Error: {} in parsing feed (read_feed)'.format(e))
         await asyncio.sleep(0)
 
 
@@ -70,10 +78,11 @@ async def process(db, channel, entries):
                 await db.set_news(news)
                 news_count += 1
             except Exception as e:
-                print(e)
+                logger.log(logging.WARN, 'Error: {} in db.set_news'.format(e))
         else:
             break
-    print('Добавленно {} новостей из {}'.format(news_count, channel))
+    logger.log(logging.INFO, 'Добавленно {} новостей из {}'.format(news_count, channel))
+    # print('Добавленно {} новостей из {}'.format(news_count, channel))
 
 
 async def get_data2(channel, feeds_queue):
@@ -87,9 +96,11 @@ async def get_data2(channel, feeds_queue):
                     data = await response.read()
                     feeds_queue.put((channel, data))
             except TimeoutError as e:
-                print('Connection Timeout', e)
+                logger.log(logging.WARN, 'Error: {} in session.get'.format(e))
+                # print('Connection Timeout', e)
             except aiohttp.client_exceptions.ClientConnectorError as e:
-                print('Connection Error')
+                logger.log(logging.WARN, 'Connection error: {} in session.get'.format(e))
+                # print('Connection Error')
 
 
 def main_cycle():
@@ -111,6 +122,7 @@ def main_cycle():
 
     loop.close()
     elapsed = time.time() - start
+
     print('Затраченное время: {:.3f} сек'.format(elapsed))
 
 
