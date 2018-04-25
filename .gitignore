@@ -111,3 +111,8 @@ mytoken.py
 
 # IDE
 .idea/
+
+
+#certs
+src/MyTeleBot/webhook_pkey.pem
+src/MyTeleBot/webhook_cert.pem
