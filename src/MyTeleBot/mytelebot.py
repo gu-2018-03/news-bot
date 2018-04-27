@@ -1,4 +1,7 @@
 import telebot
+import time
+
+from utils.messagequeue import MessageQueue
 
 import constants
 from mytelebot_db import MyTeleBotDB
@@ -11,6 +14,9 @@ class MyTeleBot:
         self.bot = telebot.TeleBot(TOKEN)
         self.db = MyTeleBotDB()
         self.init_handlers()
+        self.n = 0
+        self.last_time = time.time()
+        self.q = MessageQueue()
 
     def init_handlers(self):
         """
@@ -23,7 +29,18 @@ class MyTeleBot:
 
         @self.bot.message_handler(content_types=['text'])
         def handle_message(message):
-            self.bot.send_message(
+            # self.bot.send_message(
+            #     message.chat.id,
+            #     self.format_news(),
+            #     parse_mode='HTML',
+            #     disable_web_page_preview=1
+            # )
+            self.n += 1
+            now = time.time()
+            print(self.n, '{:.2f} sec'.format(now - self.last_time))
+            self.last_time = now
+            self.q.send(
+                self.bot,
                 message.chat.id,
                 self.format_news(),
                 parse_mode='HTML',
