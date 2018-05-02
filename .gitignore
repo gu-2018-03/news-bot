@@ -1,6 +1,7 @@
 *.pdf
 *.log
 *.log.*
+log/
 temp.py
 .vscode/
 

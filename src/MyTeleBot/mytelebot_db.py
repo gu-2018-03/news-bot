@@ -35,6 +35,10 @@ class MyTeleBotDB:
         self.db = self.client.telebot
         self.news = self.db.news
         self.news.create_index('published')
+        self.news.create_index(
+            [('title', pymongo.TEXT), ('summary', pymongo.TEXT)],
+            default_language='russian')
+        
         self.rss = self.db.rss
         self.rss.create_index('name', unique=True)
         self.rss.create_index('channel', unique=True)
@@ -43,7 +47,7 @@ class MyTeleBotDB:
     def get_news(self, key='', count=10) -> []:
         """
         Принимает на вход:
-        key   - (пока не используется)
+        key   - строка для поиска по новостям
         count - количество возвращаемых новостей
 
         Возвращает список из словарей, каждый словарь - отдельная новость.
@@ -60,10 +64,13 @@ class MyTeleBotDB:
             'base':      -адрес rss-канала
         }
         """
-        news = self.news.find() \
-            .sort('published', pymongo.DESCENDING) \
-            .limit(count)
-        return list(news)
+        if key:
+            news = self.news.find(
+                {'$text' : {'$search': key}}
+            )
+        else:
+            news = self.news.find()
+        return list(news.sort('published', pymongo.DESCENDING).limit(count))
 
     def set_news(self, news: dict):
         """
@@ -228,6 +235,15 @@ class AsyncMyTeleBotDB:
         self.client = motor_asyncio.AsyncIOMotorClient(io_loop=loop)
 
         self.db = self.client.telebot
+        self.news = self.db.news
+        self.news.create_index('published')
+        self.news.create_index(
+            [('title', pymongo.TEXT), ('summary', pymongo.TEXT)],
+            default_language='russian')
+        
+        self.rss = self.db.rss
+        self.rss.create_index('name', unique=True)
+        self.rss.create_index('channel', unique=True)
         self.required = {'title', 'published', 'link', 'summary', 'base'}
 
     async def get_news(self, key='', count=10) -> []:

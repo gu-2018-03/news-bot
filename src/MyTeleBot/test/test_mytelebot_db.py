@@ -9,9 +9,9 @@ from MyTeleBot.mytelebot_db import MyTeleBotDB
 def db():
     news_db = MyTeleBotDB()
     ex_db = news_db.db
-    news_db.db = news_db.client.test_db
+    news_db.news = news_db.client.test_db.news
     yield news_db
-    news_db.db.news.drop()
+    news_db.news.drop()
     news_db.db = ex_db
 
 
