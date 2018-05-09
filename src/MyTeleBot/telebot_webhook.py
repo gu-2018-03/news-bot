@@ -6,17 +6,6 @@ from mytelebot_db import MyTeleBotDB
 from emoji import emojize
 from datetime import datetime
 
-#server config
-WEBHOOK_HOST = '95.163.248.15' #static server ip
-WEBHOOK_PORT = 443 # port 443, 80, 88 or 8443
-WEBHOOK_LISTEN = '0.0.0.0' #listen from everywhere
-
-WEBHOOK_SSL_CERT = './webhook_cert.pem' #cert
-WEBHOOK_SSL_PRIV = './webhook_pkey.pem' #privat cert
-
-WEBHOOK_URL_BASE = "https://%s:%s" % (WEBHOOK_HOST, WEBHOOK_PORT)
-WEBHOOK_URL_PATH = "/%s/" % (TOKEN)
-
 bot = telebot.TeleBot(TOKEN)
 
 # webhook-server
@@ -70,18 +59,18 @@ def format_news():
 bot.remove_webhook()
 
 # setup webhook
-bot.set_webhook(url=WEBHOOK_URL_BASE + WEBHOOK_URL_PATH,
-                certificate=open(WEBHOOK_SSL_CERT, 'r'))
+bot.set_webhook(url=constants.WEBHOOK_URL_BASE + constants.WEBHOOK_URL_PATH,
+                certificate=open(constants.WEBHOOK_SSL_CERT, 'r'))
 
 
 # CherryPy server config
 cherrypy.config.update({
-    'server.socket_host': WEBHOOK_LISTEN,
-    'server.socket_port': WEBHOOK_PORT,
+    'server.socket_host': constants.WEBHOOK_LISTEN,
+    'server.socket_port': constants.WEBHOOK_PORT,
     'server.ssl_module': 'builtin',
-    'server.ssl_certificate': WEBHOOK_SSL_CERT,
-    'server.ssl_private_key': WEBHOOK_SSL_PRIV
+    'server.ssl_certificate': constants.WEBHOOK_SSL_CERT,
+    'server.ssl_private_key': constants.WEBHOOK_SSL_PRIV
 })
 
 
-cherrypy.quickstart(WebhookServer(), WEBHOOK_URL_PATH, {'/': {}})
+cherrypy.quickstart(WebhookServer(), constants.WEBHOOK_URL_PATH, {'/': {}})
