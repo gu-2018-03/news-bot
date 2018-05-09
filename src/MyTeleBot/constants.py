@@ -1,7 +1,7 @@
 from mytoken import TOKEN
 
 #webhooks of pooling
-WEBHOOK = 'NO'
+WEBHOOK = 'YES'
 
 
 GREET = 'Рад Вас приветствовать! Напишите мне что-нибудь и я Вам пришлю 10' \
