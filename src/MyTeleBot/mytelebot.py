@@ -26,13 +26,13 @@ class MyTeleBot:
         def handle_message(message):
             self.bot.send_message(
                 message.chat.id,
-                self.format_news(),
+                self.format_news(message.text),
                 parse_mode='HTML',
                 disable_web_page_preview=1
             )
 
-    def format_news(self):
-        news = self.db.get_news()
+    def format_news(self, key=''):
+        news = self.db.get_news(key=key)
         if len(news) == 0:
             return (constants.BASE_EMPTY)
         answer = '\n\n'
