@@ -43,7 +43,14 @@ class MyTeleBot:
         return answer
 
     def run(self):
-        self.bot.polling(none_stop=True, interval=0)
+        # remove webhook before started
+        self.bot.remove_webhook()
+        if constants.WEBHOOK=='YES':
+            # setup webhook 
+            self.bot.set_webhook(url=WEBHOOK_URL_BASE + WEBHOOK_URL_PATH,
+                      certificate=open(WEBHOOK_SSL_CERT, 'r'))
+        else:
+            self.bot.polling(none_stop=True, interval=0)
 
 
 if __name__ == '__main__':
