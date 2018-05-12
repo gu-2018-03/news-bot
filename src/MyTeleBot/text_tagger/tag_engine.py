@@ -3,7 +3,7 @@ import numpy as n
 import snowballstemmer as sn
 
 def tagger(input_text):
-
+    tags=[]
     def sigmoid(x):
         return 1/(1+n.exp(-1*x))
 
@@ -45,12 +45,13 @@ def tagger(input_text):
         cap = 0.6
 
         if L2[0]>cap:
-            tag = '#политика'
+            tags.append('#политика')
         elif L2[1]>cap:
-            tag = '#спорт'
+            tags.append('#спорт')
         elif L2[2]>cap:
-            tag = '#экономика'
+            tags.append('#экономика')
     except Exception:
-        tag='#none'
+        tags.append('#none')
 
-    return tag
+
+    return tags
