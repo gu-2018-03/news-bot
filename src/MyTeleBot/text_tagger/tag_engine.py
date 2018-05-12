@@ -40,13 +40,15 @@ def tagger(input_text):
         L1 = sigmoid(n.dot(tst_in,W_1))
         L2 = sigmoid(n.dot(L1,W_2))
         #print(L2)
-    
+
         L2 = L2[0]
-        if L2[0]>L2[1] and L2[0]>L2[2]:
+        cap = 0.6
+
+        if L2[0]>cap:
             tag = '#политика'
-        elif L2[1]>L2[0] and L2[1]>L2[2]:
+        elif L2[1]>cap:
             tag = '#спорт'
-        elif L2[2]>L2[0] and L2[2]>L2[1]:
+        elif L2[2]>cap:
             tag = '#экономика'
     except Exception:
         tag='#none'
