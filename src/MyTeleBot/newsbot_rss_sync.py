@@ -61,6 +61,7 @@ class MyTeleBotRSS:
         Принимает:
         channels - список веб-адресов каналов rss.
         """
+        logger.info('MyTeleBotRSS client started')
         for channel in RSS_CHANNELS:
             rss = feedparser.parse(channel)
             if rss.bozo:
@@ -68,13 +69,23 @@ class MyTeleBotRSS:
                                rss.bozo_exception)
                 continue
             self.process(channel, rss.entries)
+
+    def close(self):
+        """ Закрытие клиента """
         self.db.close()
         logger.info('MyTeleBotRSS client is closed')
 
 
 if __name__ == '__main__':
     bot_rss = MyTeleBotRSS()
+    start = time.time()
+
     try:
         bot_rss.run(RSS_CHANNELS)
     except Exception as err:
         logger.exception('Error: %s', err)
+    finally:
+        bot_rss.close()
+
+    elapsed = time.time() - start
+    logger.info('Затраченное время: %.3f сек', elapsed)
