@@ -1,0 +1,1 @@
+*/5 *	* * *	/usr/bin/python3 /var/www/news-bot/src/MyTeleBot/newsbot_rss.py  >> /var/log/newsbot.rss.log 2>&1
