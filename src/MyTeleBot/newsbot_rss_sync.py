@@ -68,6 +68,8 @@ class MyTeleBotRSS:
                                rss.bozo_exception)
                 continue
             self.process(channel, rss.entries)
+        self.db.close()
+        logger.info('MyTeleBotRSS client is closed')
 
 
 if __name__ == '__main__':
