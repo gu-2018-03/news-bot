@@ -6,6 +6,7 @@ from mytoken import TOKEN
 from emoji import emojize
 from datetime import datetime
 
+
 class MyTeleBot:
     def __init__(self):
         self.bot = telebot.TeleBot(TOKEN)
@@ -27,8 +28,7 @@ class MyTeleBot:
                 message.chat.id,
                 self.format_news(message.text),
                 parse_mode='HTML',
-                disable_web_page_preview=1
-            )
+                disable_web_page_preview=1)
 
     def format_news(self, key=''):
         news = self.db.get_news(key=key)
@@ -36,9 +36,14 @@ class MyTeleBot:
             return (constants.BASE_EMPTY)
         answer = '\n\n'
         for i in news:
-            date = datetime.utcfromtimestamp(i['published']).strftime("%Y-%m-%d %H:%M:%S")
+            date = datetime.utcfromtimestamp(
+                i['published']).strftime('%d %b %Y %H:%M')
             payload = constants.TEMPLATE.format(**i)
-            answer = '{} {} {} {} \n\n'.format(answer, emojize(":arrow_right:", use_aliases=True), str(date), payload)
+            answer = '{} {} {} {} \n\n'.format(answer,
+                                               emojize(
+                                                   ':arrow_right:',
+                                                   use_aliases=True),
+                                               str(date), payload)
 
         return answer
 
