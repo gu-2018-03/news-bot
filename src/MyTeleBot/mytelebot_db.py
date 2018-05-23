@@ -1,13 +1,12 @@
 import pymongo
 from motor import motor_asyncio
-import time
 
 
 class AlreadyExistsError(Exception):
     """ Класс исключения.
     Генерируется при попытке сохранения в бд поля, помеченного как уникальное,
     если в бд уже существует запись с таким полем.
-    
+
     """
     pass
 
@@ -15,7 +14,6 @@ class AlreadyExistsError(Exception):
 class DoesNotExistsError(Exception):
     """ Класс исключения.
     Генерируется при попытке обновления документа, которого несуществует в бд.
-
     """
     pass
 
@@ -38,7 +36,7 @@ class MyTeleBotDB:
         self.news.create_index(
             [('title', pymongo.TEXT), ('summary', pymongo.TEXT)],
             default_language='russian')
-        
+
         self.rss = self.db.rss
         self.rss.create_index('name', unique=True)
         self.rss.create_index('channel', unique=True)
@@ -65,9 +63,7 @@ class MyTeleBotDB:
         }
         """
         if key:
-            news = self.news.find(
-                {'$text' : {'$search': key}}
-            )
+            news = self.news.find({'$text': {'$search': key}})
         else:
             news = self.news.find()
         return list(news.sort('published', pymongo.DESCENDING).limit(count))
@@ -119,7 +115,7 @@ class MyTeleBotDB:
 
     def add_rss(self, short_name, channel, **kwargs):
         """ Добавить в бд запись о rss-канале
-        
+
         Args:
             short_name (str): короткое уникальное имя.
             channel (str): web-адрес канала.
@@ -128,7 +124,6 @@ class MyTeleBotDB:
         Raises:
             AlreadyExistsError: при попытке сохранить в бд, если запись
                 с таким short_name или channel уже существует в бд.
-        
         """
         rss_item = {**kwargs}
         rss_item['name'] = short_name
@@ -152,36 +147,35 @@ class MyTeleBotDB:
 
     def check_rss_channel(self, channel) -> bool:
         """ Проверить наличие в бд канала по его web-адресу.
-        
+
         Args:
             channel (str): web-адрес канала
-        
+
         Returns:
             bool: True - имеется в бд, False - нет.
 
         """
         return bool(self.rss.find_one({'channel': channel}))
-    
+
     def update_rss(self, short_name, **kwargs):
         """ Обновить запись о rss-канале в бд.
-        
+
         Args:
             short_name (str): короткое уникальное имя для канала.
             **kwargs: поля с новым значением.
-        
+
         Raises:
-            DoesNotExistsError: при попытке обновить несуществующую запись в бд.
+            DoesNotExistsError: при попытке обновить несуществующую запись в бд
 
         """
         if not self.check_rss_name(short_name):
-            raise DoesNotExistsError('Документа с short_name {} не существует' \
-                .format(short_name))
+            raise DoesNotExistsError('Документа с short_name {} не существует'
+                                     .format(short_name))
         self.rss.update_one({'name': short_name}, {'$set': kwargs})
-
 
     def delete_rss(self, short_name):
         """ Удалить из бд запись о rss-канале.
-        
+
         Args:
             short_name (str): короткое уникальное имя для канала.
 
@@ -206,7 +200,7 @@ class MyTeleBotDB:
 
     def get_rss(self, key):
         """ Получить данные rss-канала из бд.
-        
+
         Args:
             key (str): короткое имя канала или web-адрес.
 
@@ -218,12 +212,17 @@ class MyTeleBotDB:
                 ... (дополнительные данные),
             }
             или None, если ничего не нашлось.
-            
+
         """
-        result = (self.rss.find_one({'name': key})
-                  or self.rss.find_one({'channel': key}))
+        result = (self.rss.find_one({
+            'name': key
+        }) or self.rss.find_one({
+            'channel': key
+        }))
         return result
 
+    def close(self):
+        self.client.close()
 
 
 class AsyncMyTeleBotDB:
@@ -240,7 +239,7 @@ class AsyncMyTeleBotDB:
         self.news.create_index(
             [('title', pymongo.TEXT), ('summary', pymongo.TEXT)],
             default_language='russian')
-        
+
         self.rss = self.db.rss
         self.rss.create_index('name', unique=True)
         self.rss.create_index('channel', unique=True)

@@ -1,0 +1,14 @@
+[Unit]
+Description=newsbot
+After=syslog.target
+
+[Service]
+Type=simple
+WorkingDirectory=/var/www/news-bot/
+ExecStart=/usr/bin/python3 /var/www/news-bot/src/MyTeleBot/mytelebot.py
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+Alias=news-bot.service

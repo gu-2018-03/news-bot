@@ -37,11 +37,11 @@ class MyTeleBot:
         answer = '\n\n'
         for i in news:
             date = datetime.utcfromtimestamp(
-                i['published']).strftime("%Y-%m-%d %H:%M:%S")
+                i['published']).strftime('%d %b %Y %H:%M')
             payload = constants.TEMPLATE.format(**i)
             answer = '{} {} {} {} \n\n'.format(answer,
                                                emojize(
-                                                   ":arrow_right:",
+                                                   ':arrow_right:',
                                                    use_aliases=True),
                                                str(date), payload)
 
