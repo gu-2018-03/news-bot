@@ -63,15 +63,15 @@ class MyTeleBot:
             # CherryPy server config
             cherrypy.config.update({
                 'server.socket_host':
-                constants.WEBHOOK_LISTEN,
+                    constants.WEBHOOK_LISTEN,
                 'server.socket_port':
-                constants.WEBHOOK_PORT,
+                    constants.WEBHOOK_PORT,
                 'server.ssl_module':
-                'builtin',
+                    'builtin',
                 'server.ssl_certificate':
-                constants.WEBHOOK_SSL_CERT,
+                    constants.WEBHOOK_SSL_CERT,
                 'server.ssl_private_key':
-                constants.WEBHOOK_SSL_PRIV
+                    constants.WEBHOOK_SSL_PRIV
             })
 
             cherrypy.quickstart(WebhookServer(), constants.WEBHOOK_URL_PATH,
