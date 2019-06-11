@@ -171,4 +171,4 @@ with open(synapse_file, 'w') as outfile:
 
 
 
-print("--- %s seconds ---" % (time.time() - start_time))
+print(time.time() - start_time)
